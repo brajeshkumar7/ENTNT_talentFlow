@@ -3,11 +3,11 @@ import Dexie from 'dexie'
 export class TalentFlowDatabase extends Dexie {
   constructor() {
     super('TalentFlowDB')
-    
+
     this.version(1).stores({
       jobs: '++id, title, department, status, description, requirements, created_at, updated_at, slug, tags, archived',
-      candidates: '++id, name, email, phone, position, stage, experience, location, resume_url, notes, created_at, updated_at',
-      applications: '++id, job_id, candidate_id, status, applied_at, notes, stage_history',
+      candidates: '++id, name, email, phone, position, stage, experience, location, resume_url, notes, created_at, updated_at, stage_history',
+      applications: '++id, job_id, candidate_id, stage, applied_at, notes, stage_history',
       assessments: '++id, job_id, title, description, questions, created_at, updated_at',
       assessment_responses: '++id, assessment_id, candidate_id, responses, score, completed_at'
     })
@@ -37,9 +37,11 @@ const locations = [
   'Chicago, IL', 'Denver, CO', 'Portland, OR', 'Atlanta, GA', 'Miami, FL', 'Dallas, TX'
 ]
 
-const stages = ['applied', 'review', 'interview', 'assessment', 'offer', 'hired', 'rejected']
-const jobStatuses = ['active', 'draft', 'paused', 'archived']
-const techTags = ['React', 'Node.js', 'Python', 'TypeScript', 'AWS', 'Docker', 'Kubernetes', 'GraphQL']
+const stages = ['applied', 'screen', 'test', 'offer', 'hired', 'rejected']
+const jobStatuses = ['active', 'draft', 'paused', 'archived', 'closed']
+const techTags = ['React', 'Node.js', 'Python', 'TypeScript', 'AWS', 'Docker', 'Kubernetes', 'GraphQL',
+  'Machine Learning', 'Data Science', 'Frontend', 'Backend', 'Full Stack', 'DevOps',
+  'UI/UX', 'Product Management', 'Marketing', 'Sales', 'Remote', 'Senior', 'Junior']
 
 // Generate exactly 25 jobs as required
 function generateJobs() {
@@ -49,7 +51,7 @@ function generateJobs() {
     const department = departments[i % departments.length]
     const status = jobStatuses[i % jobStatuses.length]
     const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-    
+
     jobs.push({
       id: i,
       title,
@@ -76,15 +78,28 @@ function generateJobs() {
 function generateCandidates() {
   const candidates = []
   for (let i = 1; i <= 1000; i++) {
-    const name = i <= candidateNames.length 
-      ? candidateNames[i - 1] 
+    const name = i <= candidateNames.length
+      ? candidateNames[i - 1]
       : `${candidateNames[i % candidateNames.length]} ${Math.floor(i / candidateNames.length)}`
-    
+
     const position = jobTitles[i % jobTitles.length]
     const location = locations[i % locations.length]
     const stage = stages[i % stages.length]
     const experience = `${Math.floor(Math.random() * 10) + 1} years`
-    
+    const createdAt = new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000); // Last 60 days
+    const stageHistory = [{
+      stage: 'applied',
+      date: createdAt.toISOString(),
+      notes: 'Initial application received'
+    }];
+    if (stage !== 'applied') {
+      stageHistory.push({
+        stage: stage,
+        date: new Date(createdAt.getTime() + Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(), // Sometime after applying
+        notes: `Stage updated to ${stage}`
+      });
+    }
+
     candidates.push({
       id: i,
       name,
@@ -96,8 +111,10 @@ function generateCandidates() {
       location,
       resume_url: `https://example.com/resume-${i}.pdf`,
       notes: `${name} is a ${experience} experienced ${position} with excellent skills and strong background.`,
-      created_at: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000), // Last 60 days
-      updated_at: new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000)  // Last 14 days
+      //created_at: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000), // Last 60 days
+      created_at: createdAt,
+      updated_at: new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000),  // Last 14 days
+      stage_history: stageHistory // ADD THIS LINE
     })
   }
   return candidates
@@ -107,20 +124,20 @@ function generateCandidates() {
 function generateApplications(jobs, candidates) {
   const applications = []
   let id = 1
-  
+
   // Ensure each job has some applications (random 5-20 per job)
   jobs.forEach(job => {
     const numApplications = Math.floor(Math.random() * 16) + 5 // 5-20 applications per job
     const selectedCandidates = candidates
       .sort(() => 0.5 - Math.random())
       .slice(0, numApplications)
-    
+
     selectedCandidates.forEach(candidate => {
       applications.push({
         id: id++,
         job_id: job.id,
         candidate_id: candidate.id,
-        status: candidate.stage,
+        stage: candidate.stage,
         applied_at: new Date(Date.now() - Math.random() * 45 * 24 * 60 * 60 * 1000), // Last 45 days
         notes: `Application for ${job.title}`,
         stage_history: [
@@ -130,7 +147,7 @@ function generateApplications(jobs, candidates) {
       })
     })
   })
-  
+
   return applications
 }
 
@@ -422,23 +439,23 @@ export async function initializeDatabase() {
   try {
     // Check if data already exists
     const jobCount = await db.jobs.count()
-    
+
     if (jobCount === 0) {
       console.log('🚀 Seeding database with comprehensive data...')
-      
+
       // Seed the database with exactly the required amounts
       await db.jobs.bulkAdd(seedData.jobs)
       console.log('✅ Added 25 jobs')
-      
+
       await db.candidates.bulkAdd(seedData.candidates)
       console.log('✅ Added 1,000 candidates')
-      
+
       await db.applications.bulkAdd(seedData.applications)
       console.log(`✅ Added ${seedData.applications.length} applications`)
-      
+
       await db.assessments.bulkAdd(seedData.assessments)
       console.log('✅ Added 3 comprehensive assessments')
-      
+
       console.log('🎉 Database seeded successfully with all required data!')
     } else {
       console.log('📊 Database already contains data')

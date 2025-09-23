@@ -150,10 +150,11 @@ function JobForm({ job = null, onSave, onCancel }) {
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent className="bg-slate-800 border-white/20 text-white">
-            <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="paused">Paused</SelectItem>
             <SelectItem value="archived">Archived</SelectItem>
+            <SelectItem value="archived">Closed</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -273,7 +274,8 @@ export default function JobsPage() {
       active: 'default',
       draft: 'secondary',
       paused: 'outline',
-      archived: 'destructive'
+      archived: 'destructive',
+      closed: 'destructive'
     }
     return variants[status] || 'default'
   }
@@ -454,7 +456,8 @@ export default function JobsPage() {
         { value: 'active', label: 'Active' },
         { value: 'draft', label: 'Draft' },
         { value: 'paused', label: 'Paused' },
-        { value: 'archived', label: 'Archived' }
+        { value: 'archived', label: 'Archived' },
+        { value: 'closed', label: 'Closed' }
       ]
     }
   ]
@@ -494,7 +497,8 @@ export default function JobsPage() {
             { value: 'active', label: 'Active' },
             { value: 'draft', label: 'Draft' },
             { value: 'paused', label: 'Paused' },
-            { value: 'archived', label: 'Archived' }
+            { value: 'archived', label: 'Archived' },
+            { value: 'closed', label: 'Closed' }
           ]
         }
       ],

@@ -311,8 +311,8 @@ export function JobCreatePage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800/95 backdrop-blur-xl border-white/10 rounded-xl">
-                        <SelectItem value="draft" className="text-white hover:bg-white/10">Draft</SelectItem>
                         <SelectItem value="active" className="text-white hover:bg-white/10">Active</SelectItem>
+                        <SelectItem value="draft" className="text-white hover:bg-white/10">Draft</SelectItem>
                         <SelectItem value="paused" className="text-white hover:bg-white/10">Paused</SelectItem>
                         <SelectItem value="archived" className="text-white hover:bg-white/10">Archived</SelectItem>
                         <SelectItem value="closed" className="text-white hover:bg-white/10">Closed</SelectItem>
