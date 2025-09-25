@@ -139,8 +139,6 @@ npm run lint
 
 This is a static SPA. Build output is in `dist/`.
 - Vercel: Framework = Vite; Build = `npm run build`; Output = `dist`
-- Netlify: Build = `npm run build`; Publish = `dist`; add redirects: `/* /index.html 200`
-- Any static host (S3/CloudFront, Nginx): serve `dist` and configure SPA fallback
 
 ## 17. Troubleshooting
 
@@ -154,18 +152,6 @@ This is a static SPA. Build output is in `dist/`.
 - Role-based access control; multi-tenant orgs and teams
 - Webhooks and 3rd-party ATS integrations
 - Advanced analytics with cohorting and conversion funnels
-
-## 19. Changelog (Template)
-
-```
-## [Unreleased]
--
-
-## [1.0.0] - YYYY-MM-DD
-- Initial public release
-```
-
----
 
 For quick links and a high-level summary, see the top-level `README.md`.
 
